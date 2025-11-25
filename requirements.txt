@@ -1,0 +1,6 @@
+Flask==3.1.0
+beautifulsoup4
+google-generativeai
+requests
+python-dotenv
+gunicorn

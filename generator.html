@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean UI - HTML Reskinner</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code&display=swap"
+        rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Poppins:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* --- GLOBAL STYLE --- */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            height: 100vh;
+            /* Layar penuh */
+            display: flex;
+            overflow: hidden;
+            /* Tidak ada scroll di body utama */
+        }
+
+        /* --- PANEL KIRI (EDITOR) --- */
+        .editor-panel {
+            width: 45%;
+            /* Lebar panel kiri */
+            background-color: #1e1e1e;
+            /* Latar belakang gelap ala code editor */
+            color: #d4d4d4;
+            /* Warna teks terang */
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #333;
+            /* Garis pemisah tipis */
+        }
+
+        .editor-header {
+            padding: 15px 20px;
+            background-color: #252526;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #9cdcfe;
+            /* Warna biru muda untuk judul */
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .code-textarea {
+            flex: 1;
+            /* Mengisi sisa ruang vertikal */
+            width: 100%;
+            background-color: #1e1e1e;
+            border: none;
+            resize: none;
+            /* Tidak bisa di-resize manual */
+            padding: 20px;
+            color: #d4d4d4;
+            font-family: 'Fira Code', monospace;
+            /* Font khusus koding */
+            font-size: 14px;
+            line-height: 1.6;
+            outline: none;
+            /* Hilangkan outline saat diklik */
+        }
+
+        .code-textarea::placeholder {
+            color: #555;
+        }
+
+        /* Warna placeholder redup */
+
+        .theme-toolbar {
+            padding: 15px 20px;
+            background-color: #252526;
+            border-top: 1px solid #333;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .theme-btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .theme-btn.active {
+            border-color: white;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+        }
+
+        /* Warna Tombol */
+        .btn-premium {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+
+        .btn-spicy {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+
+        .btn-friendly {
+            background: linear-gradient(135deg, #ec4899, #db2777);
+            color: white;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            margin-left: auto;
+        }
+
+        /* --- PANEL KANAN (PREVIEW) --- */
+        .preview-panel {
+            flex: 1;
+            /* Mengisi sisa lebar layar (55%) */
+            background-color: #f3f4f6;
+            /* Latar belakang abu terang */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            position: relative;
+        }
+
+        .preview-label {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        /* BINGKAI HP (MOBILE FRAME) */
+        .mobile-frame {
+            width: 375px;
+            /* Lebar standar iPhone */
+            height: 80vh;
+            /* Tinggi 80% layar */
+            background-color: white;
+            border-radius: 40px;
+            /* Sudut sangat bulat ala HP modern */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            /* Bayangan lembut */
+            border: 12px solid #111827;
+            /* Bingkai hitam tebal */
+            overflow: hidden;
+            /* Konten tidak boleh keluar bingkai */
+            position: relative;
+        }
+
+        /* Notch/Kamera HP di atas */
+        .mobile-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 30px;
+            background-color: #111827;
+            border-bottom-left-radius: 18px;
+            border-bottom-right-radius: 18px;
+            z-index: 10;
+        }
+
+        /* Layar HP (Tempat konten muncul) */
+        .mobile-screen {
+            width: 100%;
+            height: 100%;
+            overflow-y: auto;
+            /* Bisa di-scroll vertikal */
+            background-color: white;
+            /* INI PENTING: Padding 2px agar mepet pinggir seperti request */
+            padding: 40px 2px 20px 2px;
+            scrollbar-width: none;
+        }
+
+        .mobile-screen::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Theme Specific Styles (Dynamic) */
+        .theme-premium {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .theme-pedas {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .theme-sahabat {
+            font-family: 'Poppins', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="editor-panel">
+        <div class="editor-header">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd"
+                    d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z"
+                    clip-rule="evenodd" />
+            </svg>
+            <span>HTML Input</span>
+        </div>
+
+        <textarea id="inputPasteCode" class="code-textarea" placeholder="<!DOCTYPE html>
+<html>
+<head>
+  <title>Web Lama</title>
+</head>
+<body>
+  <h1>Judul Biasa Saja</h1>
+  <p>Contoh paragraf yang belum didesain.</p>
+  <button>Klik Saya</button>
+</body>
+</html>"></textarea>
+
+        <div class="theme-toolbar">
+            <span style="font-size: 12px; color: #888; margin-right: 10px;">Pilih Desain:</span>
+            <button onclick="setTheme('premium')" id="btn-premium" class="theme-btn btn-premium active">
+                <span>💎</span> Premium
+            </button>
+            <button onclick="setTheme('pedas')" id="btn-pedas" class="theme-btn btn-spicy">
+                <span>🌶️</span> Pedas
+            </button>
+            <button onclick="setTheme('sahabat')" id="btn-sahabat" class="theme-btn btn-friendly">
+                <span>🥰</span> Sahabat
+            </button>
+
+            <button onclick="processPastedCode()" class="theme-btn btn-generate">
+                <span>⚡</span> Generate
+            </button>
+        </div>
+    </div>
+
+    <div class="preview-panel">
+        <div class="preview-label">
+            <span class="live-dot"></span>
+            Live Mobile Preview
+        </div>
+
+        <div class="mobile-frame">
+            <div class="mobile-notch"></div>
+
+            <div id="preview-body" class="mobile-screen" style="background-color: #f0f4f8;">
+                <!-- Content will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        const state = {
+            headline: 'Judul Biasa Saja (Sekarang Jadi Keren)',
+            image: '',
+            story: 'Ini adalah contoh bagaimana paragraf biasa dari kode HTML Anda akan otomatis diubah menjadi desain yang rapi, bersih, dan profesional seperti ini. Anda tidak perlu coding CSS lagi.',
+            priceOriginal: '',
+            priceDiscount: '',
+            benefits: '',
+            cta: 'KLIK SAYA (DESAIN BARU)',
+            theme: 'premium'
+        };
+
+        // Theme Configurations
+        const themes = {
+            premium: {
+                container: 'bg-white text-gray-800 font-serif',
+                headline: 'text-3xl font-bold text-slate-900 mb-4 leading-tight',
+                image: 'rounded-2xl shadow-lg mb-6 w-full object-cover',
+                storyBox: 'bg-slate-50 p-6 rounded-xl shadow-sm border border-slate-100 mb-6 text-lg leading-relaxed text-slate-700',
+                priceBox: 'text-center mb-8 p-4 border-y border-slate-200',
+                priceOriginal: 'text-slate-400 line-through text-lg mr-2',
+                priceDiscount: 'text-blue-900 text-4xl font-bold',
+                benefitList: 'space-y-3 mb-8',
+                benefitItem: 'flex items-start text-slate-700 text-lg',
+                benefitIcon: 'text-blue-600 mr-3 mt-1',
+                ctaButton: 'block w-full bg-blue-900 text-white text-center py-4 rounded-xl text-xl font-bold shadow-lg hover:bg-blue-800 transition transform hover:-translate-y-1',
+                footer: 'text-center text-slate-400 text-sm mt-8 pb-4'
+            },
+            pedas: {
+                container: 'bg-red-50 text-gray-900 font-sans',
+                headline: 'text-4xl font-black text-red-700 mb-4 uppercase tracking-tighter',
+                image: 'border-4 border-red-600 mb-6 w-full object-cover shadow-[8px_8px_0px_0px_rgba(220,38,38,1)]',
+                storyBox: 'bg-white p-5 border-2 border-red-600 mb-6 text-lg font-medium text-gray-900 shadow-[4px_4px_0px_0px_rgba(220,38,38,0.3)]',
+                priceBox: 'text-center mb-8 bg-yellow-300 p-4 border-2 border-black transform -rotate-1',
+                priceOriginal: 'text-red-800 line-through text-xl font-bold block',
+                priceDiscount: 'text-red-700 text-5xl font-black',
+                benefitList: 'space-y-2 mb-8 border-l-4 border-red-600 pl-4',
+                benefitItem: 'flex items-center text-gray-900 font-bold text-lg',
+                benefitIcon: 'text-red-600 mr-2 text-2xl',
+                ctaButton: 'block w-full bg-red-600 text-white text-center py-4 text-2xl font-black uppercase border-b-8 border-red-800 active:border-b-0 active:mt-2 shadow-xl hover:bg-red-500',
+                footer: 'text-center text-red-400 text-xs mt-8 font-bold uppercase tracking-widest'
+            },
+            sahabat: {
+                container: 'bg-pink-50 text-gray-700 font-sans',
+                headline: 'text-3xl font-bold text-pink-600 mb-4 text-center',
+                image: 'rounded-[30px] mb-6 w-full object-cover border-4 border-white shadow-pink-200 shadow-xl',
+                storyBox: 'bg-white p-6 rounded-[20px] rounded-tl-none shadow-sm mb-6 text-gray-600 leading-relaxed border border-pink-100 relative ml-4',
+                priceBox: 'text-center mb-8 bg-purple-100 rounded-3xl p-6 mx-4',
+                priceOriginal: 'text-purple-400 line-through text-lg block mb-1',
+                priceDiscount: 'text-purple-600 text-4xl font-bold',
+                benefitList: 'space-y-3 mb-8 bg-white p-6 rounded-2xl shadow-sm mx-2',
+                benefitItem: 'flex items-center text-gray-600',
+                benefitIcon: 'text-pink-400 mr-3 bg-pink-100 rounded-full p-1',
+                ctaButton: 'block w-full bg-gradient-to-r from-pink-400 to-purple-500 text-white text-center py-4 rounded-full text-lg font-bold shadow-lg shadow-pink-200 hover:shadow-xl transition hover:scale-105',
+                footer: 'text-center text-pink-300 text-sm mt-8'
+            }
+        };
+
+        // DOM Elements
+        const inputPasteCode = document.getElementById('inputPasteCode');
+        const previewBody = document.getElementById('preview-body');
+
+        // Extract Content Function
+        window.processPastedCode = function () {
+            const html = inputPasteCode.value;
+            if (!html.trim()) {
+                alert('Silakan tempel kode HTML terlebih dahulu!');
+                return;
+            }
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Heuristic Extraction
+            const extracted = {};
+
+            // 1. Headline: Try h1, then title, then first h2
+            const h1 = doc.querySelector('h1');
+            const title = doc.querySelector('title');
+            const h2 = doc.querySelector('h2');
+            extracted.headline = h1 ? h1.innerText.trim() : (title ? title.innerText.trim() : (h2 ? h2.innerText.trim() : ''));
+
+            // 2. Image: First img src
+            const img = doc.querySelector('img');
+            extracted.image = img ? img.src : '';
+
+            // 3. Story: Longest paragraph or first substantial p
+            const paragraphs = Array.from(doc.querySelectorAll('p'));
+            const storyP = paragraphs.sort((a, b) => b.innerText.length - a.innerText.length)[0];
+            extracted.story = storyP ? storyP.innerText.trim() : '';
+
+            // 4. Prices: Look for currency patterns
+            const bodyText = doc.body.innerText;
+            const priceMatches = bodyText.match(/Rp\s?[\d,.]+/gi);
+            if (priceMatches && priceMatches.length > 0) {
+                extracted.priceDiscount = priceMatches[0];
+                extracted.priceOriginal = priceMatches.length > 1 ? priceMatches[1] : '';
+            }
+
+            // 5. Benefits: Try ul li
+            const lis = Array.from(doc.querySelectorAll('ul li'));
+            if (lis.length > 0) {
+                extracted.benefits = lis.map(li => li.innerText.trim()).join('\n');
+            } else {
+                extracted.benefits = '';
+            }
+
+            // 6. CTA: Try button or a with specific keywords
+            const ctaKeywords = ['beli', 'pesan', 'order', 'sekarang', 'diskon', 'promo'];
+            const buttons = Array.from(doc.querySelectorAll('button, a'));
+            const cta = buttons.find(el => ctaKeywords.some(kw => el.innerText.toLowerCase().includes(kw)));
+            extracted.cta = cta ? cta.innerText.trim() : (buttons.length > 0 ? buttons[0].innerText.trim() : '');
+
+            // Apply extracted values to state
+            if (extracted.headline) state.headline = extracted.headline;
+            if (extracted.image) state.image = extracted.image;
+            if (extracted.story) state.story = extracted.story;
+            if (extracted.priceOriginal) state.priceOriginal = extracted.priceOriginal;
+            if (extracted.priceDiscount) state.priceDiscount = extracted.priceDiscount;
+            if (extracted.benefits) state.benefits = extracted.benefits;
+            if (extracted.cta) state.cta = extracted.cta;
+
+            render();
+        };
+
+        // Render Function
+        function render() {
+            const theme = themes[state.theme];
+            const benefitsListHTML = state.benefits.split('\n').filter(line => line.trim() !== '').map(line => `
+                <li class="${theme.benefitItem}">
+                    <span class="${theme.benefitIcon}">
+                        ${getCheckIcon(state.theme)}
+                    </span>
+                    ${line}
+                </li>
+            `).join('');
+
+            // Update Preview Container Class
+            previewBody.className = `mobile-screen p-4 pt-8 ${theme.container}`;
+
+            // Construct HTML
+            previewBody.innerHTML = `
+                <div class="pt-8 pb-12">
+                    <h1 class="${theme.headline}">${state.headline}</h1>
+                    
+                    ${state.image ? `<img src="${state.image}" class="${theme.image}" alt="Product Image" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Error'">` : ''}
+                    
+                    <div class="${theme.storyBox}">
+                        ${state.story.replace(/\n/g, '<br>')}
+                    </div>
+
+                    ${state.priceDiscount ? `
+                    <div class="${theme.priceBox}">
+                        <span class="${theme.priceOriginal}">${state.priceOriginal}</span>
+                        <span class="${theme.priceDiscount}">${state.priceDiscount}</span>
+                    </div>` : ''}
+
+                    ${state.benefits ? `
+                    <ul class="${theme.benefitList}">
+                        ${benefitsListHTML}
+                    </ul>` : ''}
+
+                    <a href="#" class="${theme.ctaButton}">
+                        ${state.cta}
+                    </a>
+
+                    <div class="${theme.footer}">
+                        &copy; 2024 Brand Name
+                    </div>
+                </div>
+            `;
+        }
+
+        function getCheckIcon(themeName) {
+            if (themeName === 'pedas') return '💥';
+            if (themeName === 'sahabat') return `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>`;
+            return `<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>`;
+        }
+
+        // Theme Switcher
+        window.setTheme = function (themeName) {
+            state.theme = themeName;
+
+            // Update Buttons UI
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.borderColor = 'transparent';
+                btn.style.boxShadow = 'none';
+            });
+
+            const activeBtn = document.getElementById(`btn-${themeName}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+
+            render();
+        };
+
+        // Initial Render
+        render();
+
+    </script>
+</body>
+
+</html>
